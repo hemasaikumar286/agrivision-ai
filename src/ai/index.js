@@ -1,0 +1,1 @@
+export { getWeatherAdvice } from "./weatherAI";
