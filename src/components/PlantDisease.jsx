@@ -9,44 +9,49 @@ export default function PlantDisease({ goBack }) {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 📸 Convert image to base64
+  // 📸 Convert image properly
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
+
     if (!file) return;
 
     const reader = new FileReader();
 
     reader.onload = () => {
-      setImage(reader.result);
+      setImage(reader.result); // data:image/...base64
     };
 
     reader.readAsDataURL(file);
   };
 
-  // 🤖 AI Analysis
+  // 🌿 Analyze plant image
   const analyze = async () => {
-    if (!image) return;
+    if (!image) {
+      setResult("⚠ Please upload a plant image first");
+      return;
+    }
 
     setLoading(true);
     setResult("");
 
     try {
       const res = await analyzePlantImage(image, language);
-      setResult(res);
+
+      setResult(res || "⚠ No analysis received");
     } catch (err) {
-      setResult("Analysis failed. Try again.");
+      setResult("❌ Error analyzing plant image");
     }
 
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-green-950 text-white p-6">
+    <div className="min-h-screen bg-green-950 text-white p-5">
       
       {/* HEADER */}
       <button
         onClick={goBack}
-        className="bg-white text-black px-4 py-2 rounded mb-6"
+        className="mb-4 bg-white text-black px-4 py-2 rounded"
       >
         ⬅ Back
       </button>
@@ -55,8 +60,8 @@ export default function PlantDisease({ goBack }) {
         🌿 Plant Disease Detection AI
       </h1>
 
-      <p className="mb-6 text-gray-300">
-        Upload a plant leaf image and get AI-powered disease detection.
+      <p className="text-gray-300 mb-6">
+        Upload a plant leaf image to detect disease, cause, and solution.
       </p>
 
       {/* UPLOAD */}
@@ -69,13 +74,11 @@ export default function PlantDisease({ goBack }) {
 
       {/* PREVIEW */}
       {image && (
-        <div className="mb-4">
-          <img
-            src={image}
-            alt="Plant"
-            className="w-64 h-64 object-cover rounded-lg border"
-          />
-        </div>
+        <img
+          src={image}
+          alt="plant"
+          className="w-64 h-64 object-cover rounded-xl border mb-4"
+        />
       )}
 
       {/* BUTTON */}
@@ -89,9 +92,9 @@ export default function PlantDisease({ goBack }) {
 
       {/* RESULT */}
       {result && (
-        <div className="mt-6 p-4 bg-black/40 rounded-lg border border-green-400">
-          <h2 className="font-bold mb-2">AI Result:</h2>
-          <p>{result}</p>
+        <div className="mt-6 bg-black/40 p-4 rounded-xl border border-green-400">
+          <h2 className="font-bold mb-2">Result:</h2>
+          <pre className="whitespace-pre-wrap">{result}</pre>
         </div>
       )}
     </div>

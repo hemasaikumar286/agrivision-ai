@@ -4,7 +4,7 @@ export async function analyzePlantImage(base64Image, language = "english") {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer YOUR_OPENROUTER_API_KEY"
+        Authorization: `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`
       },
       body: JSON.stringify({
         model: "openai/gpt-4o-mini",
@@ -12,14 +12,14 @@ export async function analyzePlantImage(base64Image, language = "english") {
           {
             role: "system",
             content:
-              "You are an expert plant disease detection AI. Analyze images and respond with disease, cause, and solution in simple farmer-friendly language."
+              "You are ONLY a plant disease detection AI. You must NOT answer anything else. If image is not a plant leaf, say 'Not a plant image'. Always return: Disease name, cause, and solution in simple farming language."
           },
           {
             role: "user",
             content: [
               {
                 type: "text",
-                text: `Language: ${language}. Identify plant disease and give solution.`
+                text: `Language: ${language}. Analyze ONLY this plant image.`
               },
               {
                 type: "image_url",
@@ -35,8 +35,14 @@ export async function analyzePlantImage(base64Image, language = "english") {
 
     const data = await response.json();
 
-    return data?.choices?.[0]?.message?.content || "No analysis available";
+    console.log("API RESPONSE:", data); // 🔥 IMPORTANT DEBUG
+
+    return (
+      data?.choices?.[0]?.message?.content ||
+      "⚠ Unable to analyze plant image"
+    );
   } catch (err) {
-    return "Image analysis failed. Try again.";
+    console.error(err);
+    return "❌ Plant analysis failed";
   }
 }
