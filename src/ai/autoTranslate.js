@@ -1,4 +1,4 @@
-import { getAIResponse } from "./openRouter";
+import { getAIResponse } from "./openai";
 
 export async function autoTranslate(text, targetLanguage = "hindi") {
   const prompt = `

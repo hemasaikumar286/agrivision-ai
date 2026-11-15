@@ -2,7 +2,7 @@ import { farmingBrain } from "./farmingBrain";
 import { detectPlantDisease } from "./plantAI";
 import { getWeatherAdvice } from "./weatherAI";
 import { getFarmAlerts } from "./farmAlerts";
-import { getAIResponse } from "./openRouter";
+import { getAIResponse } from "./openai";
 
 /**
  * 🧠 AGRIBRAIN AI - MASTER DECISION ENGINE
