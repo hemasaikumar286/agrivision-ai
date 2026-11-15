@@ -70,7 +70,7 @@ If the image is not a plant, say:
 
           temperature: 0.2,
 
-          max_tokens: 800
+          max_tokens: 400
         })
       }
     );
