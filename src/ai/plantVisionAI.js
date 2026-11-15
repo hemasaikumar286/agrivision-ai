@@ -23,7 +23,11 @@ export async function analyzePlantImage(base64Image, language = "english") {
         },
 
         body: JSON.stringify({
-        model: "nvidia/nemotron-3.5-super-vl:free",
+          model: "nvidia/nemotron-3.5-super-vl:free",
+
+          reasoning: {
+            enabled: false
+          },
 
           messages: [
             {
@@ -95,15 +99,30 @@ If the image is not a plant, say:
       }`;
     }
 
-    const result = data?.choices?.[0]?.message?.content;
+    const choice = data?.choices?.[0];
+    const message = choice?.message;
 
-    if (!result) {
-      console.error("❌ No AI response:", data);
+    let result = message?.content;
 
-      return "❌ No analysis was returned by the AI.";
+    if (Array.isArray(result)) {
+      result = result
+        .filter(item => item.type === "text" && item.text)
+        .map(item => item.text)
+        .join("\n");
     }
 
-    return result;
+    if (typeof result === "string" && result.trim()) {
+      return result.trim();
+    }
+
+    console.error("❌ No AI response:", data);
+    console.error("Finish reason:", choice?.finish_reason);
+
+    if (choice?.finish_reason === "length") {
+      return "⚠️ AI response was cut short. Please try again.";
+    }
+
+    return "⚠️ AI returned an empty response. Please try again.";
 
   } catch (error) {
     console.error("❌ Plant image analysis error:", error);
