@@ -26,7 +26,7 @@ export async function analyzePlantImage(base64Image, language = "english") {
           model: "nvidia/nemotron-3.5-super-vl:free",
 
           reasoning: {
-            enabled: false
+            effort: "none"
           },
 
           messages: [
@@ -74,14 +74,14 @@ If the image is not a plant, say:
 
           temperature: 0.2,
 
-          max_tokens: 300
+          max_tokens: 1500
         })
       }
     );
 
     const data = await response.json();
 
-    console.log("🌿 PLANT AI RESPONSE:", data);
+    console.log("🌿 PLANT AI FULL RESPONSE:", JSON.stringify(data, null, 2));
 
     if (!response.ok) {
       console.error("❌ OpenRouter HTTP Error:", data);
@@ -102,6 +102,10 @@ If the image is not a plant, say:
     const choice = data?.choices?.[0];
     const message = choice?.message;
 
+    console.log("AI MESSAGE:", message);
+    console.log("AI FINISH REASON:", choice?.finish_reason);
+    console.log("AI USAGE:", data?.usage);
+
     let result = message?.content;
 
     if (Array.isArray(result)) {
@@ -111,18 +115,23 @@ If the image is not a plant, say:
         .join("\n");
     }
 
-    if (typeof result === "string" && result.trim()) {
+    if (typeof result === "string" && result.trim().length > 0) {
       return result.trim();
     }
 
-    console.error("❌ No AI response:", data);
-    console.error("Finish reason:", choice?.finish_reason);
+    console.error("❌ Empty AI response:", data);
 
     if (choice?.finish_reason === "length") {
-      return "⚠️ AI response was cut short. Please try again.";
+      return "⚠️ AI response was incomplete. Please try again.";
     }
 
-    return "⚠️ AI returned an empty response. Please try again.";
+    if (choice?.finish_reason === "content_filter") {
+      return "⚠️ Image analysis was blocked by the AI safety filter.";
+    }
+
+    return `⚠️ AI returned an empty response.
+Finish reason: ${choice?.finish_reason || "Unknown"}
+Please try again.`;
 
   } catch (error) {
     console.error("❌ Plant image analysis error:", error);
