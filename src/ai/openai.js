@@ -1,31 +1,61 @@
 export async function getAIResponse(message, language = "english") {
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer YOUR_OPENAI_API_KEY`
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are an expert farming assistant. Respond in the user's language."
-          },
-          {
-            role: "user",
-            content: message + " (Language: " + language + ")"
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+    if (!apiKey) {
+      throw new Error("Gemini API key is missing");
+    }
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text:
+                    "You are an expert farming assistant. Respond in the user's language.\n\n" +
+                    message +
+                    "\n\nLanguage: " + language
+                }
+              ]
+            }
+          ],
+
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 1000
           }
-        ]
-      })
-    });
+        })
+      }
+    );
 
     const data = await response.json();
 
-    return data?.choices?.[0]?.message?.content || "No response from AI";
+    console.log("🌱 GEMINI RESPONSE:", data);
+
+    if (!response.ok) {
+      throw new Error(
+        data?.error?.message || "Gemini API request failed"
+      );
+    }
+
+    return (
+      data?.candidates?.[0]?.content?.parts
+        ?.map(part => part.text || "")
+        .join("\n")
+        .trim() || "No response from AI"
+    );
+
   } catch (error) {
-    return "AI error. Please try again.";
+    console.error("AI error:", error);
+    return "AI error: " + error.message;
   }
 }
