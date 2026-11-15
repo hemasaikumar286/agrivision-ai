@@ -39,12 +39,14 @@ export async function agribrain(message, language = "english") {
   if (farm) return farm;
 
   /*********************************
-   * 🤖 5. FULL AI FALLBACK (OpenRouter LLM)
+   * 🤖 5. GEMINI AI FALLBACK
    *********************************/
   try {
     const aiReply = await getAIResponse(message, language);
     return aiReply;
   } catch (err) {
+    console.error("Gemini AI error:", err);
+
     return language === "hindi"
       ? "AI उपलब्ध नहीं है, कृपया बाद में प्रयास करें।"
       : "AI is currently unavailable. Please try again later.";
