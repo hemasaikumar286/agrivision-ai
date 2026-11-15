@@ -23,7 +23,7 @@ export async function analyzePlantImage(base64Image, language = "english") {
         },
 
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+        model: "nvidia/nemotron-3.5-super-vl:free",
 
           messages: [
             {
